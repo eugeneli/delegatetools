@@ -17,35 +17,34 @@ var alreadySeen = {};
 var apiCallPs = [];
 
 var visitChildren = (root) => {
-    var params = {
-        senderId: root,
-        limit: 50,
-        orderBy: "timestamp:desc"
-    };
+    return new Promise((resolve, reject) => {
+        var params = {
+            senderId: root,
+            limit: 50,
+            orderBy: "timestamp:desc"
+        };
 
-    var apiCallPromise = new Promise((resolve, reject) => {
         arkApi.getTransactionsList(params, (error, success, response) => {
-            if(response.success)
+            if(response && response.success)
             {
-                response.transactions.forEach((tx) => {
-                    var recipient = tx.recipientId;
-                    if(!alreadySeen[recipient] && recipient != BITTREX_ADDR)
-                    {
-                        alreadySeen[tx.recipientId] = true;
-                        visitChildren(recipient);
-                        resolve();
-                    }
+                var childrenPs = response.transactions
+                .filter((tx) => !alreadySeen[tx.recipientId] && tx.recipientId != BITTREX_ADDR)
+                .map((tx) => {
+                    alreadySeen[tx.recipientId] = true;
+                    return visitChildren(tx.recipientId);
                 });
+                Promise.all(childrenPs).then(() => resolve());
             }
-            resolve();
+            else
+                resolve();
         });
     });
-
-    apiCallPs.push(apiCallPromise);
 };
 
-visitChildren(ROOT_ADDR);
+console.log("Checking transaction tree. \nThis may take a while...")
 
-Promise.all(apiCallPs).then(() => {
-    console.log(Object.keys(alreadySeen));
+visitChildren(ROOT_ADDR).then(() => {
+    var addresses = Object.keys(alreadySeen);
+    console.log(addresses);
+    console.log(`${addresses.length} addresses found`);
 });
