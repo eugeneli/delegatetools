@@ -14,7 +14,6 @@ const BITTREX_ADDR = "AUexKjGtgsSpVzPLs6jNMM6vJ6znEVTQWK";
 const ROOT_ADDR = args[0];
 
 var alreadySeen = {};
-var apiCallPs = [];
 
 var visitChildren = (root) => {
     return new Promise((resolve, reject) => {

@@ -1,7 +1,7 @@
 {
   "name": "Hoplist",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "hoplist.js",
   "dependencies": {
     "arkjs-wrapper": "git://github.com/eugeneli/arkjs-wrapper"
   },
